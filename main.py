@@ -2,35 +2,45 @@ import speech_recognition as sr
 import pyttsx3
 import datetime
 
-# Initialize speech engine
-engine = pyttsx3.init()
-voices = engine.getProperty('voices') # Get available voices
 
-# Speech function
-def speak(text):
-    engine.say(text)
-    engine.runAndWait()
+class Assistant:
+  def __init__(self):
+    self.engine = pyttsx3.init()
+    self.voices = self.engine.getProperty('voices')
+    self.engine.setProperty('voice', self.voices[24].id)
+    self.recognizer = sr.Recognizer()
 
-# Listener
-recognizer = sr.Recognizer()
+  def speak(self, text):
+    self.engine.say(text)
+    self.engine.runAndWait()
 
-def listen():    
+  def listen(self):
     with sr.Microphone() as source:
-        print("Listening . . . .")
-        audio = recognizer.listen(source)
+      print("Listening...")
+      audio = self.recognizer.listen(source)
     try:
-        input = recognizer.recognize_google(audio)
-        print(f"I heard: \n{input}")
-        return input.lower()
-    except:
-        speak("I didn't quite get that!")
-        return None
-    
-while True:
-    human = listen()
-    if human:
-        if "alvin" in human:
-            speak("Hi there! How can I help you?")
+      text = self.recognizer.recognize_google(audio)
+      print(f"I heard: \n{text}")
+      return text.lower()
+    except sr.UnknownValueError:
+      print("Sorry, could not understand audio")
+      return None
+    except sr.RequestError as e:
+      print("Could not request results from Google Speech Recognition service; {0}".format(e))
+      return None
 
+  def run(self):
+    while True:
+      user_text = self.listen()
+      if user_text:
+        if "alvin" in user_text:
+          self.speak("Hi there! How can I help you?")
         else:
-            speak("Sorry Im not yet that advanced!")
+          self.speak("Sorry, I'm not yet that advanced!")
+
+
+if __name__ == "__main__":
+  # Create an instance of the Assistant class
+  alvin = Assistant()
+  # Call the run method to start the assistant
+  alvin.run()
